@@ -4,6 +4,7 @@
 import math
 import operator
 import struct
+import unittest
 
 from drgn import (
     FaultError,
@@ -1718,3 +1719,13 @@ class TestSpecialMethods(MockProgramTestCase):
             iter,
             Object(self.prog, "int []", address=0),
         )
+
+    def test__repr_pretty_(self):
+        obj = Object(self.prog, "int", value=0)
+        pretty_printer_mock = unittest.mock.Mock()
+
+        obj._repr_pretty_(pretty_printer_mock, False)
+        pretty_printer_mock.text.assert_called_with(str(obj))
+
+        obj._repr_pretty_(p=pretty_printer_mock, cycle=True)
+        pretty_printer_mock.text.assert_called_with("...")
