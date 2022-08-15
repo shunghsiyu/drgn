@@ -908,6 +908,30 @@ static PyObject *DrgnObject_str(DrgnObject *self)
 	return ret;
 }
 
+static PyObject *DrgnObject_repr_pretty(DrgnObject *self, PyObject *args,
+					PyObject *kwds)
+{
+	static char *keywords[] = {"p", "cycle", NULL};
+	PyObject *p, *str_obj, *ret;
+	int cycle;
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "Op:_repr_pretty_", keywords,
+					 &p, &cycle))
+		return NULL;
+
+	if (cycle)
+		return PyObject_CallMethod(p, "text", "s", "...");
+
+	str_obj = DrgnObject_str(self);
+	if (!str_obj)
+		return NULL;
+
+	ret = PyObject_CallMethod(p, "text", "O", str_obj);
+	Py_DECREF(str_obj);
+	return ret;
+}
+
+
 struct format_object_flag_arg {
 	enum drgn_format_object_flags *flags;
 	enum drgn_format_object_flags value;
@@ -1653,6 +1677,8 @@ static PyMethodDef DrgnObject_methods[] = {
 	 drgn_Object_from_bytes__DOC},
 	{"format_", (PyCFunction)DrgnObject_format,
 	 METH_VARARGS | METH_KEYWORDS, drgn_Object_format__DOC},
+	{"_repr_pretty_", (PyCFunction)DrgnObject_repr_pretty,
+	 METH_VARARGS | METH_KEYWORDS, drgn_Object__repr_pretty__DOC},
 	{"__round__", (PyCFunction)DrgnObject_round,
 	 METH_VARARGS | METH_KEYWORDS},
 	{"__trunc__", (PyCFunction)DrgnObject_trunc, METH_NOARGS},
